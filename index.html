@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Entrenador de aperturas</title>
+<meta name="theme-color" content="#1A1A18">
+<meta name="description" content="Tu instructor de aperturas de ajedrez con repaso espaciado. Funciona sin conexión.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Aperturas">
+<style>
+  :root{
+    --paper:#E7E6E1; --surface:#F2F1EC; --ink:#1A1A18; --ink-soft:#6B6A64;
+    --line:#C9C7BE; --sq-light:#DAD8D0; --sq-dark:#3C4A5A;
+    --piece-white:#F6F5F0; --piece-black:#16181C;
+    --good:#2E7D4F; --bad:#C0392B; --accent:#D64520; --hint:#E0A100;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Futura","Century Gothic","Helvetica Neue",Arial,sans-serif;
+    line-height:1.4; -webkit-font-smoothing:antialiased;
+    padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:1000px;margin:0 auto}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  button{font-family:inherit}
+
+  /* ---------- header ---------- */
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:20px}
+  header.top .brand{display:flex;align-items:center;gap:11px}
+  header.top .brand .logo{width:30px;height:30px;flex:0 0 auto}
+  header.top h1{font-size:clamp(19px,3vw,26px);font-weight:700;letter-spacing:-0.02em;margin:0;text-transform:lowercase}
+  header.top .mark-dot{color:var(--accent)}
+  header.top .hstreak{font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+  header.top .hstreak b{color:var(--accent);font-size:18px}
+
+  .pill{font-size:11px;letter-spacing:.03em;padding:4px 9px;border-radius:2px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft)}
+  .pill.ok{border-color:var(--good);color:var(--good)}
+  .pill.warn{border-color:var(--hint);color:#9a7400}
+
+  /* ---------- hero sesión ---------- */
+  .hero{background:var(--ink);color:var(--paper);border-radius:3px;padding:22px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-40px;bottom:-40px;width:160px;height:14px;background:var(--accent);transform:rotate(-12deg)}
+  .hero .hero-left{position:relative;z-index:1}
+  .hero .hero-eyebrow{font-size:12px;letter-spacing:.05em;color:#B9B7AE;margin:0 0 6px;text-transform:lowercase}
+  .hero .hero-count{font-size:clamp(26px,5vw,38px);font-weight:700;line-height:1;letter-spacing:-0.02em}
+  .hero .hero-sub{font-size:14px;color:#CFCDC4;margin-top:6px}
+  .hero .btn-hero{position:relative;z-index:1;background:var(--accent);color:#fff;border:none;border-radius:2px;padding:14px 22px;font-size:15px;font-weight:600;cursor:pointer;transition:transform .08s,filter .12s}
+  .hero .btn-hero:hover{filter:brightness(1.08)}
+  .hero .btn-hero:active{transform:scale(.98)}
+  .hero .btn-hero:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+  /* ---------- métricas ---------- */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+  .metric{background:var(--surface);border:1.5px solid var(--line);border-radius:2px;padding:12px 14px}
+  .metric .n{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+  .metric .n .sub{font-size:14px;color:var(--ink-soft);font-weight:400}
+  .metric .l{font-size:11px;color:var(--ink-soft);margin-top:4px;text-transform:lowercase}
+  .metric.accent .n{color:var(--accent)}
+
+  h2.sec{font-size:12px;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 10px;font-weight:600;text-transform:lowercase}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px}
+  .rep-col h3{font-size:11px;color:var(--ink-soft);margin:0 0 8px;display:flex;align-items:center;gap:7px;font-weight:400}
+  .rep-col h3::before{content:"";width:12px;height:12px;border:1.5px solid var(--ink)}
+  .rep-col.black h3::before{background:var(--ink)}
+  .rep-row{display:block;width:100%;text-align:left;cursor:pointer;background:var(--surface);border:1.5px solid var(--line);border-radius:2px;padding:9px 11px;margin-bottom:7px;color:var(--ink);transition:border-color .12s}
+  .rep-row:hover{border-color:var(--ink)}
+  .rep-row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .rr-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .rr-name{font-size:14px}
+  .rr-eco,.rr-due{font-size:11px;color:var(--ink-soft);font-family:ui-monospace,Menlo,monospace}
+  .rr-due{color:var(--accent);font-weight:700}
+  .rr-bar{height:5px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
+  .rr-bar span{display:block;height:100%;background:var(--ink)}
+
+  /* ---------- pgn + ajustes ---------- */
+  .panel{background:var(--surface);border:1.5px solid var(--line);border-radius:2px;padding:16px;margin-bottom:16px}
+  .panel .field{margin-bottom:10px}
+  .panel label{font-size:13px;display:block;margin-bottom:4px}
+  .panel input[type=text],.panel textarea{width:100%;border:1.5px solid var(--line);border-radius:2px;padding:8px;background:var(--paper);color:var(--ink);font-family:ui-monospace,Menlo,monospace;font-size:13px}
+  .panel textarea{min-height:64px;resize:vertical}
+  .panel input:focus-visible,.panel textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .pgn-colors{display:flex;gap:16px;font-size:13px;margin:8px 0}
+  .pgn-colors label{display:flex;align-items:center;gap:6px;cursor:pointer;margin:0}
+  .btn{background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);border-radius:2px;padding:10px 16px;font-size:14px;cursor:pointer;transition:background .12s,color .12s}
+  .btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn.ghost{background:var(--paper);color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .pgn-msg{font-size:12px;margin-top:8px;min-height:15px}
+  .pgn-msg.err{color:var(--bad)} .pgn-msg.ok{color:var(--good)}
+  .pgn-row{display:flex;gap:8px;align-items:stretch;margin-bottom:7px}
+  .pgn-row .rep-row{margin:0;flex:1}
+  .pgn-del{width:38px;border:1.5px solid var(--line);background:var(--paper);border-radius:2px;cursor:pointer;font-size:18px;color:var(--ink-soft)}
+  .pgn-del:hover{border-color:var(--bad);color:var(--bad)}
+  .muted{font-size:13px;color:var(--ink-soft)}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .settings-row .num{width:64px;border:1.5px solid var(--line);border-radius:2px;padding:7px;background:var(--paper);color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+  .backup-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .file-label{display:inline-block}
+  .file-label input{display:none}
+
+  /* ---------- trainer ---------- */
+  #viewTrainer{display:none}
+  .tbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .tbar .btn-back{background:none;border:none;color:var(--ink);font-size:15px;cursor:pointer;padding:6px 4px;display:flex;align-items:center;gap:6px}
+  .tbar .btn-back:hover{color:var(--accent)}
+  .tbar .tinfo{flex:1;min-width:0}
+  .tbar .tinfo .t1{font-size:16px;font-weight:700;line-height:1.1}
+  .tbar .tinfo .t2{font-size:12px;color:var(--ink-soft)}
+  .tbar .sprog{font-size:12px;color:var(--accent);font-weight:600;font-family:ui-monospace,Menlo,monospace}
+
+  .var-badge{font-size:12px;color:var(--ink-soft);min-height:16px;margin-bottom:8px;font-family:ui-monospace,Menlo,monospace}
+  .status-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .turn-tag{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600}
+  .turn-tag .disc{width:15px;height:15px;border:2px solid var(--ink)}
+  .turn-tag.black .disc{background:var(--ink)}
+  .progress{font-size:13px;color:var(--ink-soft)}
+  .progress .mono{color:var(--ink);font-size:14px;font-family:ui-monospace,Menlo,monospace}
+
+  .board-shell{display:flex;gap:8px;align-items:stretch;max-width:560px;margin:0 auto}
+  .ranks{display:flex;flex-direction:column;justify-content:space-around;font-size:11px;color:var(--ink-soft);padding:2px 0}
+  .board-and-files{flex:1;min-width:0}
+  .board{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border:2px solid var(--ink)}
+  .files{display:grid;grid-template-columns:repeat(8,1fr);font-size:11px;color:var(--ink-soft);text-align:center;padding-top:3px}
+  .sq{position:relative;display:flex;align-items:center;justify-content:center;user-select:none}
+  .sq.light{background:var(--sq-light)} .sq.dark{background:var(--sq-dark)}
+  .sq.playable{cursor:pointer}
+  .piece{font-size:min(9.4vw,50px);line-height:1;pointer-events:none}
+  @media(min-width:600px){.piece{font-size:50px}}
+  .piece.w{color:var(--piece-white);text-shadow:0 0 1px var(--ink),0 1px 2px rgba(0,0,0,.35)}
+  .piece.b{color:var(--piece-black);text-shadow:0 0 1px rgba(255,255,255,.35)}
+  .sq.selected::after{content:"";position:absolute;inset:0;border:3px solid var(--accent)}
+  .sq .dot{position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(26,26,24,.32)}
+  .sq.dark .dot{background:rgba(246,245,240,.4)}
+  .sq.target-capture .dot{width:78%;height:78%;background:transparent;border:4px solid rgba(26,26,24,.34);border-radius:50%}
+  .sq.dark.target-capture .dot{border-color:rgba(246,245,240,.42)}
+  .sq.hint::before{content:"";position:absolute;inset:0;background:var(--hint);opacity:.34}
+  .sq.flash-good::before{content:"";position:absolute;inset:0;background:var(--good);opacity:.42}
+  .sq.flash-bad::before{content:"";position:absolute;inset:0;background:var(--bad);opacity:.42}
+  .sq.lastmove::before{content:"";position:absolute;inset:0;background:var(--accent);opacity:.16}
+
+  .idea{background:var(--surface);border:1.5px solid var(--line);border-radius:2px;padding:14px 16px;min-height:88px;max-width:560px;margin:14px auto 0}
+  .idea .head{font-size:12px;letter-spacing:.05em;color:var(--ink-soft);margin:0 0 6px;font-weight:600}
+  .idea .body{font-size:15px;margin:0}
+  .idea .body .mv{font-weight:700}
+  .idea .desc{font-size:13px;color:var(--ink-soft);margin:6px 0 0}
+  .idea.good{border-color:var(--good);border-left:4px solid var(--good)}
+  .idea.bad{border-color:var(--bad);border-left:4px solid var(--bad)}
+  .idea.done{border-color:var(--accent);border-left:4px solid var(--accent)}
+
+  .moves-log{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--surface);border:1.5px solid var(--line);border-radius:2px;padding:10px 12px;min-height:36px;line-height:1.7;word-break:break-word;max-width:560px;margin:12px auto 0}
+  .moves-log .ply-you{color:var(--accent);font-weight:600}
+  .moves-log .num{color:var(--ink-soft)}
+
+  .controls{display:flex;gap:10px;flex-wrap:wrap;max-width:560px;margin:14px auto 0}
+  button.ctrl{font-size:14px;cursor:pointer;padding:11px 16px;border-radius:2px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);transition:background .12s,color .12s}
+  button.ctrl:hover{background:var(--ink);color:var(--paper)}
+  button.ctrl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.ctrl.primary{background:var(--ink);color:var(--paper)}
+  button.ctrl.primary:hover{background:var(--accent);border-color:var(--accent)}
+  button.ctrl:disabled{opacity:.4;cursor:not-allowed}
+  button.ctrl:disabled:hover{background:var(--paper);color:var(--ink)}
+
+  .err-load{background:#fff;border:2px solid var(--bad);padding:16px;border-radius:2px;color:var(--bad);font-size:14px;margin-bottom:16px}
+
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(120%);background:var(--ink);color:var(--paper);padding:13px 18px;border-radius:3px;font-size:14px;max-width:90vw;text-align:center;transition:transform .3s;z-index:50;box-shadow:0 6px 22px rgba(0,0,0,.25)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.err{background:var(--bad)}
+
+  @media(max-width:640px){
+    .metrics{grid-template-columns:repeat(2,1fr)}
+    .cols{grid-template-columns:1fr;gap:14px}
+    .hero{padding:18px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img class="logo" src="./icon-192.png" alt="">
+      <h1>entrenador de aperturas<span class="mark-dot">.</span></h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="hstreak" title="Días seguidos entrenando">🔥 <b id="homeStreak">0</b></span>
+      <span class="pill" id="persistBadge">…</span>
+      <span class="pill" id="syncBadge">…</span>
+    </div>
+  </header>
+
+  <div id="loadErr"></div>
+
+  <!-- ================= HOME / INSTRUCTOR ================= -->
+  <section id="viewHome">
+    <div class="hero" id="sessionHero">
+      <div class="hero-left">
+        <p class="hero-eyebrow">sesión de hoy</p>
+        <div class="hero-count">—</div>
+        <div class="hero-sub">…</div>
+      </div>
+      <button class="btn-hero" id="btnStartSession">Empezar</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric accent"><div class="n" id="homeMastery">0<span class="sub">%</span></div><div class="l">dominio</div></div>
+      <div class="metric"><div class="n" id="homeAcc">—</div><div class="l">precisión</div></div>
+      <div class="metric"><div class="n" id="homeLines">0</div><div class="l">líneas jugadas</div></div>
+      <div class="metric"><div class="n" id="homeStreak2" style="display:none">0</div>
+        <div class="n"><span id="homeReviewLeft"></span></div><div class="l">práctica libre</div>
+        <button class="btn ghost" id="btnExplore" style="padding:6px 10px;font-size:13px;margin-top:2px">Explorar</button></div>
+    </div>
+
+    <h2 class="sec">tu repertorio — toca para explorar</h2>
+    <div class="cols">
+      <div class="rep-col white"><h3>con blancas</h3><div id="repMapWhite"></div></div>
+      <div class="rep-col black"><h3>con negras</h3><div id="repMapBlack"></div></div>
+    </div>
+
+    <h2 class="sec">tu repertorio propio (PGN)</h2>
+    <div class="panel">
+      <div id="pgnList"></div>
+      <p class="muted" id="pgnEmpty">Aún no has guardado líneas propias. Pega tu repertorio real abajo y quedará guardado para entrenarlo.</p>
+      <div class="field"><label>Nombre</label><input type="text" id="pgnName" placeholder="Ej. Mi Siciliana"></div>
+      <div class="field"><label>Jugadas (PGN)</label><textarea id="pgnInput" placeholder="1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6"></textarea></div>
+      <div class="pgn-colors">
+        <label><input type="radio" name="pgnColor" value="w" checked> Juego blancas</label>
+        <label><input type="radio" name="pgnColor" value="b"> Juego negras</label>
+      </div>
+      <button class="btn" id="btnSavePgn">Guardar línea</button>
+      <div class="pgn-msg" id="pgnMsg"></div>
+    </div>
+
+    <h2 class="sec">cuenta y sincronización</h2>
+    <div class="panel">
+      <div id="accountSignedOut">
+        <p class="muted" style="margin:0 0 10px">Inicia sesión con Google para que tus avances se sincronicen entre tu móvil y tu tablet automáticamente.</p>
+        <button class="btn" id="btnSignIn">Iniciar sesión con Google</button>
+      </div>
+      <div id="accountSignedIn" style="display:none">
+        <p class="muted" style="margin:0 0 10px">Conectado como <b id="accountEmail" style="color:var(--ink)"></b>. Tus avances se suben solos después de cada línea.</p>
+        <div class="backup-btns">
+          <button class="btn ghost" id="btnSyncNow">Sincronizar ahora</button>
+          <button class="btn ghost" id="btnSignOut">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="sec">ajustes y respaldo</h2>
+    <div class="panel">
+      <div class="settings-row">
+        <label style="margin:0">Líneas nuevas por sesión</label>
+        <input class="num" type="number" id="newPerSession" min="0" max="20" value="5">
+      </div>
+      <p class="muted" style="margin-top:10px">Tus avances viven en este dispositivo. Para pasarlos a otro (móvil ↔ tablet), exporta aquí e importa allá.</p>
+      <div class="backup-btns">
+        <button class="btn ghost" id="btnExport">Exportar avances</button>
+        <label class="btn ghost file-label">Importar avances<input type="file" id="fileImport" accept="application/json,.json"></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TRAINER ================= -->
+  <section id="viewTrainer">
+    <div class="tbar">
+      <button class="btn-back" id="btnBack">← Inicio</button>
+      <div class="tinfo"><div class="t1" id="trainerTitle">—</div><div class="t2" id="trainerSub"></div></div>
+      <div class="sprog" id="sessionProgress" style="display:none"></div>
+    </div>
+
+    <div class="var-badge" id="varBadge"></div>
+    <div class="status-bar">
+      <div class="turn-tag" id="turnTag"><span class="disc"></span><span id="turnText">—</span></div>
+      <div class="progress">jugada <span class="mono" id="plyNow">0</span> de <span class="mono" id="plyTotal">0</span></div>
+    </div>
+
+    <div class="board-shell">
+      <div class="ranks" id="ranks"></div>
+      <div class="board-and-files">
+        <div class="board" id="board" role="grid" aria-label="Tablero"></div>
+        <div class="files" id="files"></div>
+      </div>
+    </div>
+
+    <div class="idea" id="ideaBox">
+      <p class="head">idea</p>
+      <p class="body" id="ideaBody">—</p>
+      <p class="desc" id="opDesc"></p>
+    </div>
+
+    <div class="moves-log" id="movesLog" aria-live="polite"></div>
+
+    <div class="controls">
+      <button class="ctrl primary" id="btnContinue" style="display:none">Continuar →</button>
+      <button class="ctrl primary" id="btnHint" disabled>Pista</button>
+      <button class="ctrl" id="btnUndo" disabled>Deshacer</button>
+      <button class="ctrl" id="btnRestart" disabled>Reiniciar</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="./firebase-config.js"></script>
+<script type="module" src="./firebase-sync.js"></script>
+<script>
+  // Registro del service worker (offline). Silencioso si no está disponible.
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+  }
+  // Carga del motor: intenta local (offline), cae a CDN (preview/primer arranque).
+  (function(){
+    function loadApp(){ var s=document.createElement('script'); s.src='./app.js'; s.onload=function(){ if(window.__initApp) window.__initApp(); }; s.onerror=fail; document.head.appendChild(s); }
+    function fail(){ document.getElementById('loadErr').innerHTML='<div class="err-load">No se pudo cargar la aplicación. Revisa tu conexión y recarga.</div>'; }
+    var v=document.createElement('script'); v.src='./vendor/chess.js';
+    v.onload=loadApp;
+    v.onerror=function(){ var c=document.createElement('script'); c.src='https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js'; c.onload=loadApp; c.onerror=fail; document.head.appendChild(c); };
+    document.head.appendChild(v);
+  })();
+</script>
+</body>
+</html>
