@@ -337,6 +337,11 @@
 <script>
   // Registro del service worker (offline). Silencioso si no está disponible.
   if('serviceWorker' in navigator){
+    // Cuando un service worker nuevo toma control, recarga una vez para mostrar la versión nueva.
+    var __swRefreshed=false;
+    navigator.serviceWorker.addEventListener('controllerchange',function(){
+      if(__swRefreshed) return; __swRefreshed=true; window.location.reload();
+    });
     window.addEventListener('load',function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
   }
   // Carga del motor: intenta local (offline), cae a CDN (preview/primer arranque).

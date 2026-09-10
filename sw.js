@@ -1,6 +1,6 @@
-/* Service worker — offline cache-first.
-   Sube el número de versión cuando cambies archivos para forzar actualización. */
-const CACHE = 'entrenador-aperturas-v2';
+/* Service worker — offline con actualización automática (stale-while-revalidate).
+   Sube el número de versión cuando cambies archivos para forzar una actualización limpia. */
+const CACHE = 'entrenador-aperturas-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -32,25 +32,32 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
-  // No intervenir peticiones a otros orígenes (Firebase Auth/Firestore, Google, CDN de respaldo):
-  // deja que el navegador las maneje directo, para no interferir con login ni con la sincronización.
+  // Otros orígenes (Firebase Auth/Firestore, Google, CDN de respaldo): sin intervención.
   if (new URL(req.url).origin !== self.location.origin) return;
-  // Navegaciones: intenta red, cae a index.html cacheado (app de una sola página).
+
+  // Navegaciones: primero la red (para tomar la versión nueva), con respaldo al caché.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).catch(() => caches.match('./index.html'))
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put('./index.html', copy)).catch(() => {});
+        return res;
+      }).catch(() => caches.match('./index.html'))
     );
     return;
   }
-  // Recursos: cache-first, y guarda en caché lo que baje de la red.
+
+  // Recursos (js, css, iconos): stale-while-revalidate.
+  // Responde rápido desde caché, pero en segundo plano baja la versión nueva
+  // y actualiza el caché — así la próxima carga ya trae los cambios sin trucos.
   e.respondWith(
     caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req).then((res) => {
+      const fromNet = fetch(req).then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
         return res;
       }).catch(() => cached);
+      return cached || fromNet;
     })
   );
 });
