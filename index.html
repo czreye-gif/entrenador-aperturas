@@ -138,15 +138,8 @@
   .sq{position:relative;display:flex;align-items:center;justify-content:center;user-select:none}
   .sq.light{background:var(--sq-light)} .sq.dark{background:var(--sq-dark)}
   .sq.playable{cursor:pointer}
-  .piece{width:88%;height:88%;pointer-events:none;display:flex;align-items:center;justify-content:center}
-  .piece svg{width:100%;height:100%;display:block;overflow:visible}
-  .piece .sh{fill:none}
-  .piece .bd{stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round;stroke:#1A1A1A}
-  .piece.w .bd{fill:#F4F2E8}
-  .piece.b .bd{fill:#909090}
-  .piece .ey{fill:#1A1A1A}
-  .piece .cut{fill:#1A1A1A}
-  .piece .mane{fill:#1A1A1A}
+  .piece{width:90%;height:90%;pointer-events:none;display:flex;align-items:center;justify-content:center}
+  .piece img{width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
   .sq.selected::after{content:"";position:absolute;inset:0;border:3px solid var(--board-mark)}
   .sq .dot{position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(26,26,24,.32)}
   .sq.dark .dot{background:rgba(246,245,240,.4)}

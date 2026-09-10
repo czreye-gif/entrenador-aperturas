@@ -1,0 +1,7 @@
+Piezas de ajedrez — set "Merida"
+Autor: Armando Hernández Marroquín.
+Obtenidas del proyecto Lichess (lichess-org/lila), donde se distribuyen bajo
+licencia libre (GPLv2+). Ver: https://github.com/lichess-org/lila/blob/master/COPYING.md
+
+Estas imágenes se usan sin modificaciones, únicamente escaladas para su
+visualización. El código de esta aplicación es independiente de las imágenes.

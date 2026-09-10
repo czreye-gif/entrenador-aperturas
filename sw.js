@@ -1,6 +1,6 @@
 /* Service worker — offline con actualización automática (stale-while-revalidate).
    Sube el número de versión cuando cambies archivos para forzar una actualización limpia. */
-const CACHE = 'entrenador-aperturas-v3';
+const CACHE = 'entrenador-aperturas-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,9 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './pieces/wK.svg','./pieces/wQ.svg','./pieces/wR.svg','./pieces/wB.svg','./pieces/wN.svg','./pieces/wP.svg',
+  './pieces/bK.svg','./pieces/bQ.svg','./pieces/bR.svg','./pieces/bB.svg','./pieces/bN.svg','./pieces/bP.svg'
 ];
 
 self.addEventListener('install', (e) => {
