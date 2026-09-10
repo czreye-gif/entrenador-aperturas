@@ -73,13 +73,14 @@ if(!cfg || !cfg.apiKey || cfg.apiKey.indexOf('PEGA_') === 0){
       stats: store.stats,
       streak: store.streak,
       customPgns: store.customPgns || [],
+      settings: store.settings || {},
       updatedAt: Date.now()
     };
   }
   function fromCloudShape(cloud){
     const items = {};
     (cloud.items || []).forEach(it => { const id = it.id; const copy = Object.assign({}, it); delete copy.id; items[id] = copy; });
-    return { version: cloud.version || 1, items, stats: cloud.stats || {lines:0,attempts:0,correct:0}, streak: cloud.streak || {count:0,lastDay:null}, customPgns: cloud.customPgns || [], settings: { newPerSession: 5, guideMode: true } };
+    return { version: cloud.version || 1, items, stats: cloud.stats || {lines:0,attempts:0,correct:0}, streak: cloud.streak || {count:0,lastDay:null}, customPgns: cloud.customPgns || [], settings: cloud.settings || { newPerSession: 5, guideMode: true, pieceSet: 'merida' } };
   }
 
   CloudSync.pull = async () => {

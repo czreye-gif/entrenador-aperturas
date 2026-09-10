@@ -31,10 +31,10 @@ const el=(t,c)=>{const e=document.createElement(t); if(c)e.className=c; return e
 // ===================== PERSISTENCIA =====================
 const STORE_KEY='cae_v1';
 let persistOK=true;
-function defaultStore(){ return {version:1, items:{}, stats:{lines:0,attempts:0,correct:0}, streak:{count:0,lastDay:null}, customPgns:[], settings:{newPerSession:5, guideMode:true}}; }
+function defaultStore(){ return {version:1, items:{}, stats:{lines:0,attempts:0,correct:0}, streak:{count:0,lastDay:null}, customPgns:[], settings:{newPerSession:5, guideMode:true, pieceSet:'merida'}}; }
 let store=defaultStore();
 function loadStore(){
-  try{ const raw=localStorage.getItem(STORE_KEY); if(raw){ const p=JSON.parse(raw); store=Object.assign(defaultStore(),p); store.items=p.items||{}; store.stats=Object.assign({lines:0,attempts:0,correct:0},p.stats); store.streak=Object.assign({count:0,lastDay:null},p.streak); store.customPgns=p.customPgns||[]; store.settings=Object.assign({newPerSession:5,guideMode:true},p.settings); } }
+  try{ const raw=localStorage.getItem(STORE_KEY); if(raw){ const p=JSON.parse(raw); store=Object.assign(defaultStore(),p); store.items=p.items||{}; store.stats=Object.assign({lines:0,attempts:0,correct:0},p.stats); store.streak=Object.assign({count:0,lastDay:null},p.streak); store.customPgns=p.customPgns||[]; store.settings=Object.assign({newPerSession:5,guideMode:true,pieceSet:'merida'},p.settings); } }
   catch(e){ persistOK=false; }
   // probar escritura
   try{ localStorage.setItem(STORE_KEY+'_t','1'); localStorage.removeItem(STORE_KEY+'_t'); }catch(e){ persistOK=false; }
@@ -83,7 +83,7 @@ function mergeStores(local, remote){
   else merged.streak={lastDay:local.streak.lastDay, count:Math.max(local.streak.count||0, remote.streak.count||0)};
   const map={}; (remote.customPgns||[]).forEach(p=>map[p.id]=p); (local.customPgns||[]).forEach(p=>map[p.id]=p);
   merged.customPgns=Object.values(map);
-  merged.settings=local.settings||remote.settings;
+  merged.settings=Object.assign({newPerSession:5,guideMode:true,pieceSet:'merida'}, local.settings||{}, remote.settings||{});
   return merged;
 }
 
@@ -251,6 +251,10 @@ function renderHome(){
     row.appendChild(b); row.appendChild(del); pl.appendChild(row);
   });
   $('pgnEmpty').style.display=store.customPgns.length?'none':'block';
+  // reflejar en los controles de ajustes el estado actual (importante tras sincronizar)
+  const nps=$('newPerSession'); if(nps) nps.value=store.settings.newPerSession;
+  const psel=$('pieceSet'); if(psel) psel.value=store.settings.pieceSet||'merida';
+  const gm=$('guideMode'); if(gm) gm.checked=store.settings.guideMode!==false;
 }
 
 // ===================== iniciar entrenamiento =====================
@@ -390,7 +394,7 @@ function renderBoard(){
   if(awaiting && !selected && store.settings.guideMode){ const exps=expectedSans(); if(exps.length){ const ft=fromToOf(exps[0]); if(ft) guideSq=ft.from; } }
   rO.forEach(r=>{ fO.forEach(f=>{
     const sq=FILES[f]+(8-r); const cell=el('div','sq '+(((f+r)%2===1)?'dark':'light')); cell.dataset.sq=sq;
-    const pc=grid[r][f]; if(pc){ const sp=el('span','piece '+pc.color); const im=el('img'); im.src='./pieces/'+pc.color+pc.type.toUpperCase()+'.svg'; im.alt=''; im.draggable=false; sp.appendChild(im); cell.appendChild(sp); }
+    const pc=grid[r][f]; if(pc){ const sp=el('span','piece '+pc.color); const im=el('img'); im.src='./pieces/'+(store.settings.pieceSet||'merida')+'/'+pc.color+pc.type.toUpperCase()+'.svg'; im.alt=''; im.draggable=false; sp.appendChild(im); cell.appendChild(sp); }
     if(selected===sq) cell.classList.add('selected');
     const t=targets.find(x=>x.to===sq); if(t){ if(t.cap)cell.classList.add('target-capture'); cell.appendChild(el('span','dot')); }
     if(lastMove&&(lastMove.from===sq||lastMove.to===sq)) cell.classList.add('lastmove');
@@ -496,6 +500,7 @@ function initApp(){
   $('btnContinue').addEventListener('click',()=>{ nextInSession(); });
   const nps=$('newPerSession'); nps.value=store.settings.newPerSession; nps.addEventListener('change',()=>{ store.settings.newPerSession=Math.max(0,Math.min(20,parseInt(nps.value)||0)); saveStore(); renderHome(); });
   const gm=$('guideMode'); if(gm){ gm.checked=store.settings.guideMode!==false; gm.addEventListener('change',()=>{ store.settings.guideMode=gm.checked; saveStore(); if(activeOp) renderBoard(); }); }
+  const ps=$('pieceSet'); if(ps){ ps.value=store.settings.pieceSet||'merida'; ps.addEventListener('change',()=>{ store.settings.pieceSet=ps.value; saveStore(); if(activeOp) renderBoard(); }); }
   const bSignIn=$('btnSignIn'); if(bSignIn) bSignIn.addEventListener('click',async()=>{ try{ await window.CloudSync.signIn(); }catch(e){ toast('No se pudo iniciar sesión.',true); } });
   const bSignOut=$('btnSignOut'); if(bSignOut) bSignOut.addEventListener('click',async()=>{ await window.CloudSync.signOutUser(); toast('Cerraste sesión. Tus avances siguen guardados en este dispositivo.'); });
   const bSyncNow=$('btnSyncNow'); if(bSyncNow) bSyncNow.addEventListener('click',doPullAndMerge);

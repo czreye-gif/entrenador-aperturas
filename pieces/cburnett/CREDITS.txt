@@ -1,0 +1,5 @@
+Piezas de ajedrez — set "Cburnett"
+Autor: Colin M.L. Burnett.
+Obtenidas del proyecto Lichess (lichess-org/lila). Licencia: GPLv2+ / CC-BY-SA 3.0 / GFDL.
+Ver: https://github.com/lichess-org/lila/blob/master/COPYING.md
+Usadas sin modificaciones. El código de esta aplicación es independiente de las imágenes.

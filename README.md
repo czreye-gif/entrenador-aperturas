@@ -104,7 +104,7 @@ Si cambias archivos, sube el número de versión del caché en `sw.js` (`const C
 
 Motor de ajedrez: [chess.js](https://github.com/jhlywa/chess.js) de Jeff Hlywa (licencia BSD-2-Clause, incluida en `vendor/LICENSE`). Sincronización: Firebase (Auth + Firestore), SDK modular cargado desde `gstatic.com`.
 
-Piezas de ajedrez: set **Merida** de Armando Hernández Marroquín, obtenido del proyecto [Lichess](https://github.com/lichess-org/lila) bajo licencia libre (GPLv2+). Atribución completa en `pieces/CREDITS.txt`.
+Piezas de ajedrez: puedes elegir entre dos sets en Ajustes — **Merida** de Armando Hernández Marroquín, y **Cburnett** de Colin M.L. Burnett. Ambos del proyecto [Lichess](https://github.com/lichess-org/lila) bajo licencia libre. Atribución completa en `pieces/merida/CREDITS.txt` y `pieces/cburnett/CREDITS.txt`.
 
 Piezas de ajedrez: set **CBurnett** de Colin M. L. Burnett, disponible en [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces) bajo licencia BSD / GPL / GFDL. Usadas aquí bajo los términos de la licencia BSD, con crédito al autor.
 

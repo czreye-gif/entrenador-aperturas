@@ -1,6 +1,6 @@
 /* Service worker — offline con actualización automática (stale-while-revalidate).
    Sube el número de versión cuando cambies archivos para forzar una actualización limpia. */
-const CACHE = 'entrenador-aperturas-v5';
+const CACHE = 'entrenador-aperturas-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -13,8 +13,10 @@ const ASSETS = [
   './icon-512.png',
   './icon-maskable-512.png',
   './apple-touch-icon.png',
-  './pieces/wK.svg','./pieces/wQ.svg','./pieces/wR.svg','./pieces/wB.svg','./pieces/wN.svg','./pieces/wP.svg',
-  './pieces/bK.svg','./pieces/bQ.svg','./pieces/bR.svg','./pieces/bB.svg','./pieces/bN.svg','./pieces/bP.svg'
+  './pieces/merida/wK.svg','./pieces/merida/wQ.svg','./pieces/merida/wR.svg','./pieces/merida/wB.svg','./pieces/merida/wN.svg','./pieces/merida/wP.svg',
+  './pieces/merida/bK.svg','./pieces/merida/bQ.svg','./pieces/merida/bR.svg','./pieces/merida/bB.svg','./pieces/merida/bN.svg','./pieces/merida/bP.svg',
+  './pieces/cburnett/wK.svg','./pieces/cburnett/wQ.svg','./pieces/cburnett/wR.svg','./pieces/cburnett/wB.svg','./pieces/cburnett/wN.svg','./pieces/cburnett/wP.svg',
+  './pieces/cburnett/bK.svg','./pieces/cburnett/bQ.svg','./pieces/cburnett/bR.svg','./pieces/cburnett/bB.svg','./pieces/cburnett/bN.svg','./pieces/cburnett/bP.svg'
 ];
 
 self.addEventListener('install', (e) => {
