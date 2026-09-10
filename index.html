@@ -14,8 +14,8 @@
 <style>
   :root{
     --paper:#262421; --surface:#302E2B; --ink:#EDEDE6; --ink-soft:#9E9B94;
-    --line:#47443F; --sq-light:#EDEED1; --sq-dark:#7A9560;
-    --piece-white:#FAFAF5; --piece-black:#1B1B1B;
+    --line:#47443F; --sq-light:#E4E0C8; --sq-dark:#7A9560;
+    --piece-white:#F4F2E8; --piece-black:#909090; --piece-line:#1A1A1A;
     --good:#6FB35C; --bad:#E2584B; --accent:#7FAE4C; --hint:#E7A93B; --board-mark:#F2C94C; --hero-bg:#33421F;
   }
   *{box-sizing:border-box}
@@ -140,13 +140,13 @@
   .sq.playable{cursor:pointer}
   .piece{width:88%;height:88%;pointer-events:none;display:flex;align-items:center;justify-content:center}
   .piece svg{width:100%;height:100%;display:block;overflow:visible}
-  .piece .sh{fill:rgba(0,0,0,.22)}
-  .piece .bd{stroke-width:3.2;stroke-linejoin:round;stroke-linecap:round;paint-order:stroke fill}
-  .piece.w .bd{fill:var(--piece-white);stroke:#1b1b1b}
-  .piece.b .bd{fill:var(--piece-black);stroke:#0a0a0a}
-  .piece.w .ey{fill:#1b1b1b} .piece.b .ey{fill:#dddddd}
-  .piece.w .cut{fill:#1b1b1b} .piece.b .cut{fill:#0a0a0a}
-  .piece.w .mane{fill:#1b1b1b} .piece.b .mane{fill:#0a0a0a}
+  .piece .sh{fill:none}
+  .piece .bd{stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round;stroke:#1A1A1A}
+  .piece.w .bd{fill:#F4F2E8}
+  .piece.b .bd{fill:#909090}
+  .piece .ey{fill:#1A1A1A}
+  .piece .cut{fill:#1A1A1A}
+  .piece .mane{fill:#1A1A1A}
   .sq.selected::after{content:"";position:absolute;inset:0;border:3px solid var(--board-mark)}
   .sq .dot{position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(26,26,24,.32)}
   .sq.dark .dot{background:rgba(246,245,240,.4)}

@@ -275,8 +275,9 @@ function updateSideLabels(){
   const rivalColor = activeOp.color==='w' ? 'b' : 'w';
   const rivalWord = rivalColor==='w' ? 'blancas' : 'negras';
   const youWord = activeOp.color==='w' ? 'blancas' : 'negras';
-  $('labelTop').innerHTML = '<span class="chip '+(rivalColor==='w'?'wtone':'btone')+'"></span><span>juega el rival ('+rivalWord+')</span>';
-  $('labelBottom').innerHTML = '<span class="chip '+(activeOp.color==='w'?'wtone':'btone')+'"></span><span><span class="who">Tú</span> juegas aquí ('+youWord+')</span>';
+  const chip = c => '<span class="chip" style="background:'+(c==='w'?'#FAFAF5':'#1B1B1B')+';border:1.5px solid #8C8880;width:14px;height:14px;display:inline-block;border-radius:2px"></span>';
+  $('labelTop').innerHTML = chip(rivalColor)+'<span>juega el rival ('+rivalWord+')</span>';
+  $('labelBottom').innerHTML = chip(activeOp.color)+'<span><span class="who">Tú</span> juegas aquí ('+youWord+')</span>';
 }
 function exploreOpening(opId){ inSession=false; freeMode=true; activeItem=null; startOpening(opFull(opId)); }
 function exploreItem(itemId){ inSession=false; freeMode=false; const it=itemById(itemId); activeItem=it; startOpening(opFromItem(it)); }
