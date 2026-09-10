@@ -1,6 +1,6 @@
 /* Service worker — offline con actualización automática (stale-while-revalidate).
    Sube el número de versión cuando cambies archivos para forzar una actualización limpia. */
-const CACHE = 'entrenador-aperturas-v4';
+const CACHE = 'entrenador-aperturas-v5';
 const ASSETS = [
   './',
   './index.html',
